@@ -47,6 +47,8 @@ class DeepdubTTSService(InterruptibleWordTTSService):
         self._websocket_url = "wss://wsapi.deepdub.ai/open"
         self._websocket = None
         self._started = False
+        if sample_rate != 48000:
+            raise Exception("Unsupported sample rate")
 
     async def _connect(self):
         if self._websocket:
@@ -80,7 +82,7 @@ class DeepdubTTSService(InterruptibleWordTTSService):
                 "voicePromptId": self._voice_prompt_id,
                 "model": self._model,
                 "locale": self._locale,
-                "realTime": True,
+                "realtime": True,
             }
 
             await self._websocket.send(json.dumps(request))
