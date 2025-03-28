@@ -28,8 +28,8 @@ class DeepdubTTSService(InterruptibleWordTTSService):
         api_key: str,
         voice_prompt_id: str,
         locale: str = "en-US",
-        model: str = "dd-etts-1.1",
-        sample_rate: int = 24000,
+        model: str = "dd-etts-2.5",
+        sample_rate: int = 48000,
         **kwargs: Any,
     ):
         super().__init__(
@@ -80,6 +80,7 @@ class DeepdubTTSService(InterruptibleWordTTSService):
                 "voicePromptId": self._voice_prompt_id,
                 "model": self._model,
                 "locale": self._locale,
+                "realTime": True,
             }
 
             await self._websocket.send(json.dumps(request))
@@ -90,7 +91,8 @@ class DeepdubTTSService(InterruptibleWordTTSService):
 
                 if "data" in response:
                     audio_chunk = base64.b64decode(response["data"])
-                    frame = TTSAudioRawFrame(audio_chunk, self.sample_rate, 1)
+                    audio_data = audio_chunk[0x44:]
+                    frame = TTSAudioRawFrame(audio_data, self.sample_rate, 1)
                     await self.push_frame(frame)
 
                 if response.get("isFinished"):
